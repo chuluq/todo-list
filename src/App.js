@@ -1,25 +1,74 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Fragment, useState, useEffect } from 'react';
+import Form from './components/Form';
+import TodoList from './components/TodoList';
+
 import './App.css';
 
 function App() {
+  // State
+  const [inputText, setInputText] = useState('');
+  const [todos, setTodos] = useState([]);
+  const [status, setStatus] = useState('all');
+  const [filteredTodos, setFilteredTodos] = useState([]);
+
+  // Run once when app start
+  useEffect(() => {
+    getLocalTodos();
+  }, []);
+
+  useEffect(() => {
+    filterHandler();
+    saveLocalTodos();
+  }, [todos, status]);
+
+  const filterHandler = () => {
+    switch (status) {
+      case 'completed':
+        setFilteredTodos(todos.filter((todo) => todo.completed === true));
+        break;
+
+      case 'uncompleted':
+        setFilteredTodos(todos.filter((todo) => todo.completed === false));
+        break;
+
+      default:
+        setFilteredTodos(todos);
+        break;
+    }
+  };
+
+  // save to localStorage
+  const saveLocalTodos = () => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  };
+
+  const getLocalTodos = () => {
+    if (localStorage.getItem('todos') === null) {
+      localStorage.setItem('todos', JSON.stringify([]));
+    } else {
+      let todoLocal = JSON.parse(localStorage.getItem('todos'));
+      setTodos(todoLocal);
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <Fragment>
+      <header>
+        <h1>Luq's Todo List</h1>
       </header>
-    </div>
+      <Form
+        inputText={inputText}
+        todos={todos}
+        setInputText={setInputText}
+        setTodos={setTodos}
+        setStatus={setStatus}
+      />
+      <TodoList
+        todos={todos}
+        filteredTodos={filteredTodos}
+        setTodos={setTodos}
+      />
+    </Fragment>
   );
 }
 
